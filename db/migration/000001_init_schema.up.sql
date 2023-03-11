@@ -1,7 +1,7 @@
 CREATE TABLE "todos" (
   "id" bigserial PRIMARY KEY,
-  "title" text,
-  "completed" boolean,
+  "title" text NOT NULL,
+  "completed" boolean NOT NULL DEFAULT false,
   "create_at" timestamptz DEFAULT (now()),
   "update_at" timestamptz,
   "delete_at" timestamptz
