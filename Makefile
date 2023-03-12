@@ -14,6 +14,9 @@ migratedown:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_todo?sslmode=disable" -verbose down
 
 sqlc:
-	docker run --rm -v /your/project/path:/src -w /src kjconroy/sqlc generate
+	docker run --rm -v ${PWD}:/src -w /src kjconroy/sqlc generate
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc
+server:
+	go run main.go
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc server
