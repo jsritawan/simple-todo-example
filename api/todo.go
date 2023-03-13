@@ -126,3 +126,36 @@ func (s *Server) updateTodo(c echo.Context) error {
 		CreateAt:  todo.CreateAt,
 	})
 }
+
+type DeleteTodoResponse struct {
+	ID int64 `json:"id"`
+}
+
+func (s *Server) deleteTodo(c echo.Context) error {
+	reqID := c.Param("id")
+	if reqID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("todo id is required"))
+	}
+
+	id, err := strconv.ParseInt(reqID, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("cannot parse id"))
+	}
+
+	if err := s.store.DeleteTodo(
+		context.Background(),
+		db.DeleteTodoParams{
+			ID: id,
+			DeleteAt: sql.NullTime{
+				Time:  time.Now(),
+				Valid: true,
+			},
+		},
+	); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, DeleteTodoResponse{
+		ID: id,
+	})
+}

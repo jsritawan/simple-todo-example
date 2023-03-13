@@ -15,17 +15,19 @@ type Server struct {
 // NewServer creates a new HTTP server and registers routes.
 func NewServer(store *db.Store) *Server {
 	server := &Server{store: store}
-	router := echo.New()
+	e := echo.New()
 
-	router.Use(middleware.Logger())
-	router.Use(middleware.Recover())
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
 	// Register routes
-	router.POST("/todos", server.createTodo)
-	router.GET("/todos", server.listTodo)
-	router.PUT("/todos/:id", server.updateTodo)
+	gTodo := e.Group("/todos")
+	gTodo.POST("", server.createTodo)
+	gTodo.GET("", server.listTodo)
+	gTodo.PUT("/:id", server.updateTodo)
+	gTodo.DELETE("/:id", server.deleteTodo)
 
-	server.router = router
+	server.router = e
 	return server
 }
 
