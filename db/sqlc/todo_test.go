@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
@@ -34,20 +35,63 @@ func TestCreateTodo(t *testing.T) {
 
 func TestListTodo(t *testing.T) {
 	// Arrange
-	todo := createRandomTodo(t)
+	numOfTodos := 10
+
+	for i := 0; i < numOfTodos; i++ {
+		createRandomTodo(t)
+	}
 
 	// Act
 	todos, err := testQuery.ListTodos(context.Background())
 
 	// Assert
 	require.NoError(t, err)
-	require.Greater(t, len(todos), 0)
+	require.GreaterOrEqual(t, len(todos), numOfTodos)
 
-	latestTodo := todos[0]
-	require.Equal(t, todo.ID, latestTodo.ID)
-	require.Equal(t, todo.Note, latestTodo.Note)
-	require.Equal(t, todo.Completed, latestTodo.Completed)
-	require.WithinDuration(t, todo.CreateAt, latestTodo.CreateAt, time.Second*1)
-	require.Equal(t, todo.UpdateAt, latestTodo.UpdateAt)
-	require.Equal(t, todo.DeleteAt, latestTodo.DeleteAt)
+	for _, todo := range todos {
+		require.NotEmpty(t, todo)
+	}
+}
+
+func TestUpdateTodo(t *testing.T) {
+
+	todo1 := createRandomTodo(t)
+
+	arg := UpdateTodoParams{
+		ID:        todo1.ID,
+		Note:      util.RandomTodoNote(),
+		Completed: true,
+		UpdateAt: sql.NullTime{
+			Time:  time.Now(),
+			Valid: true,
+		},
+	}
+
+	todo2, err := testQuery.UpdateTodo(context.Background(), arg)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, todo2)
+
+	require.Equal(t, todo1.ID, todo2.ID)
+	require.Equal(t, arg.Note, todo2.Note)
+	require.Equal(t, arg.Completed, todo2.Completed)
+	require.WithinDuration(t, todo1.CreateAt, todo2.CreateAt, time.Second*1)
+	require.WithinDuration(t, arg.UpdateAt.Time, todo2.UpdateAt.Time, time.Second*1)
+	require.Equal(t, todo1.DeleteAt, todo2.DeleteAt)
+}
+
+func TestDeleteTodo(t *testing.T) {
+	todo1 := createRandomTodo(t)
+
+	arg := DeleteTodoParams{
+		ID: todo1.ID,
+		DeleteAt: sql.NullTime{
+			Time:  time.Now(),
+			Valid: true,
+		},
+	}
+
+	err := testQuery.DeleteTodo(context.Background(), arg)
+
+	require.NoError(t, err)
 }

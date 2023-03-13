@@ -7,11 +7,12 @@ INSERT INTO todos (
 
 -- name: ListTodos :many
 SELECT * FROM todos
+WHERE delete_at IS NULL
 ORDER BY id DESC;
 
 -- name: UpdateTodo :one
 UPDATE todos
-SET note = $2, update_at = $3
+SET note = $2, completed = $3, update_at = $4
 WHERE id = $1
 RETURNING *;
 

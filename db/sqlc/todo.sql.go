@@ -50,6 +50,7 @@ func (q *Queries) DeleteTodo(ctx context.Context, arg DeleteTodoParams) error {
 
 const listTodos = `-- name: ListTodos :many
 SELECT id, note, completed, create_at, update_at, delete_at FROM todos
+WHERE delete_at IS NULL
 ORDER BY id DESC
 `
 
@@ -85,19 +86,25 @@ func (q *Queries) ListTodos(ctx context.Context) ([]Todo, error) {
 
 const updateTodo = `-- name: UpdateTodo :one
 UPDATE todos
-SET note = $2, update_at = $3
+SET note = $2, completed = $3, update_at = $4
 WHERE id = $1
 RETURNING id, note, completed, create_at, update_at, delete_at
 `
 
 type UpdateTodoParams struct {
-	ID       int64        `json:"id"`
-	Note     string       `json:"note"`
-	UpdateAt sql.NullTime `json:"update_at"`
+	ID        int64        `json:"id"`
+	Note      string       `json:"note"`
+	Completed bool         `json:"completed"`
+	UpdateAt  sql.NullTime `json:"update_at"`
 }
 
 func (q *Queries) UpdateTodo(ctx context.Context, arg UpdateTodoParams) (Todo, error) {
-	row := q.db.QueryRowContext(ctx, updateTodo, arg.ID, arg.Note, arg.UpdateAt)
+	row := q.db.QueryRowContext(ctx, updateTodo,
+		arg.ID,
+		arg.Note,
+		arg.Completed,
+		arg.UpdateAt,
+	)
 	var i Todo
 	err := row.Scan(
 		&i.ID,
