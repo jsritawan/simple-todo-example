@@ -12,18 +12,18 @@ import (
 
 const createTodo = `-- name: CreateTodo :one
 INSERT INTO todos (
-    title
+    note
 ) VALUES (
     $1
-) RETURNING id, title, completed, create_at, update_at, delete_at
+) RETURNING id, note, completed, create_at, update_at, delete_at
 `
 
-func (q *Queries) CreateTodo(ctx context.Context, title string) (Todo, error) {
-	row := q.db.QueryRowContext(ctx, createTodo, title)
+func (q *Queries) CreateTodo(ctx context.Context, note string) (Todo, error) {
+	row := q.db.QueryRowContext(ctx, createTodo, note)
 	var i Todo
 	err := row.Scan(
 		&i.ID,
-		&i.Title,
+		&i.Note,
 		&i.Completed,
 		&i.CreateAt,
 		&i.UpdateAt,
@@ -49,7 +49,7 @@ func (q *Queries) DeleteTodo(ctx context.Context, arg DeleteTodoParams) error {
 }
 
 const listTodos = `-- name: ListTodos :many
-SELECT id, title, completed, create_at, update_at, delete_at FROM todos
+SELECT id, note, completed, create_at, update_at, delete_at FROM todos
 ORDER BY id
 `
 
@@ -64,7 +64,7 @@ func (q *Queries) ListTodos(ctx context.Context) ([]Todo, error) {
 		var i Todo
 		if err := rows.Scan(
 			&i.ID,
-			&i.Title,
+			&i.Note,
 			&i.Completed,
 			&i.CreateAt,
 			&i.UpdateAt,
@@ -85,23 +85,23 @@ func (q *Queries) ListTodos(ctx context.Context) ([]Todo, error) {
 
 const updateTodo = `-- name: UpdateTodo :one
 UPDATE todos
-SET title = $2, update_at = $3
+SET note = $2, update_at = $3
 WHERE id = $1
-RETURNING id, title, completed, create_at, update_at, delete_at
+RETURNING id, note, completed, create_at, update_at, delete_at
 `
 
 type UpdateTodoParams struct {
 	ID       int64        `json:"id"`
-	Title    string       `json:"title"`
+	Note     string       `json:"note"`
 	UpdateAt sql.NullTime `json:"update_at"`
 }
 
 func (q *Queries) UpdateTodo(ctx context.Context, arg UpdateTodoParams) (Todo, error) {
-	row := q.db.QueryRowContext(ctx, updateTodo, arg.ID, arg.Title, arg.UpdateAt)
+	row := q.db.QueryRowContext(ctx, updateTodo, arg.ID, arg.Note, arg.UpdateAt)
 	var i Todo
 	err := row.Scan(
 		&i.ID,
-		&i.Title,
+		&i.Note,
 		&i.Completed,
 		&i.CreateAt,
 		&i.UpdateAt,

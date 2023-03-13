@@ -1,6 +1,6 @@
 -- name: CreateTodo :one
 INSERT INTO todos (
-    title
+    note
 ) VALUES (
     $1
 ) RETURNING *;
@@ -11,7 +11,7 @@ ORDER BY id;
 
 -- name: UpdateTodo :one
 UPDATE todos
-SET title = $2, update_at = $3
+SET note = $2, update_at = $3
 WHERE id = $1
 RETURNING *;
 

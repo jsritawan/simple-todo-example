@@ -10,7 +10,7 @@ import (
 
 type Todo struct {
 	ID        int64        `json:"id"`
-	Title     string       `json:"title"`
+	Note      string       `json:"note"`
 	Completed bool         `json:"completed"`
 	CreateAt  sql.NullTime `json:"create_at"`
 	UpdateAt  sql.NullTime `json:"update_at"`
