@@ -4,12 +4,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/jsritawan/simple-todo-example/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateTodo(t *testing.T) {
 	// Arrange
-	note := "Test Create Todo"
+	note := util.RandomTodoNote()
 
 	// Act
 	todo, err := testQuery.CreateTodo(context.Background(), note)
