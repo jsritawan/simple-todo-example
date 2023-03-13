@@ -50,7 +50,7 @@ func (q *Queries) DeleteTodo(ctx context.Context, arg DeleteTodoParams) error {
 
 const listTodos = `-- name: ListTodos :many
 SELECT id, note, completed, create_at, update_at, delete_at FROM todos
-ORDER BY id
+ORDER BY id DESC
 `
 
 func (q *Queries) ListTodos(ctx context.Context) ([]Todo, error) {

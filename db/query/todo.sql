@@ -7,7 +7,7 @@ INSERT INTO todos (
 
 -- name: ListTodos :many
 SELECT * FROM todos
-ORDER BY id;
+ORDER BY id DESC;
 
 -- name: UpdateTodo :one
 UPDATE todos

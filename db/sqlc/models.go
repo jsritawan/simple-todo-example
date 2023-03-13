@@ -6,13 +6,14 @@ package db
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Todo struct {
 	ID        int64        `json:"id"`
 	Note      string       `json:"note"`
 	Completed bool         `json:"completed"`
-	CreateAt  sql.NullTime `json:"create_at"`
+	CreateAt  time.Time    `json:"create_at"`
 	UpdateAt  sql.NullTime `json:"update_at"`
 	DeleteAt  sql.NullTime `json:"delete_at"`
 }
