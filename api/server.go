@@ -23,6 +23,7 @@ func NewServer(store *db.Store) *Server {
 	// Register routes
 	router.POST("/todos", server.createTodo)
 	router.GET("/todos", server.listTodo)
+	router.PUT("/todos/:id", server.updateTodo)
 
 	server.router = router
 	return server

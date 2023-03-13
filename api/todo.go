@@ -2,10 +2,14 @@ package api
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-playground/validator"
+	db "github.com/jsritawan/simple-todo-example/db/sqlc"
 	"github.com/labstack/echo/v4"
 )
 
@@ -49,7 +53,7 @@ func (s *Server) createTodo(c echo.Context) (err error) {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, TodoResponse{
+	return c.JSON(http.StatusCreated, TodoResponse{
 		ID:        todo.ID,
 		Note:      todo.Note,
 		Completed: todo.Completed,
@@ -76,4 +80,49 @@ func (s *Server) listTodo(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, todos)
+}
+
+type UpdateTodoRequest struct {
+	Note      string `json:"note"`
+	Completed bool   `json:"completed"`
+}
+
+func (s *Server) updateTodo(c echo.Context) error {
+	reqID := c.Param("id")
+	if reqID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("todo id is required"))
+	}
+
+	id, err := strconv.ParseInt(reqID, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("cannot parse id"))
+	}
+
+	req := new(UpdateTodoRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if req.Note == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("todo note is required"))
+	}
+
+	todo, err := s.store.UpdateTodo(context.Background(), db.UpdateTodoParams{
+		ID:        id,
+		Note:      req.Note,
+		Completed: req.Completed,
+		UpdateAt: sql.NullTime{
+			Time:  time.Now(),
+			Valid: true,
+		},
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, TodoResponse{
+		ID:        todo.ID,
+		Note:      todo.Note,
+		Completed: todo.Completed,
+		CreateAt:  todo.CreateAt,
+	})
 }
